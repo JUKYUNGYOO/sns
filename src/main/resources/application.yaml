@@ -14,4 +14,7 @@ spring:
         format_sql: true
     show-sql : true
 
-
+jwt:
+  secret-key: password_application_2023_key.secretkey_pass
+  #30 days
+  token.expired-time-ms : 2592000000

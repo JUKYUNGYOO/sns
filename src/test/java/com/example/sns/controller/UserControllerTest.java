@@ -45,10 +45,10 @@ public class UserControllerTest {
         when(userService.join(userName, password)).thenReturn (mock(User.class));
 
         //회원가입은 post 메소드로 전송되므로
-        mockMvc.perform(post("api/v1/users/join")
+        mockMvc.perform(post("/api/v1/users/join")
                 .contentType(MediaType.APPLICATION_JSON)
                 // todo: add request body
-                .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName,password)))
+                .content(objectMapper.writeValueAsBytes(new UserJoinRequest("userName","password")))
 
 
         ).andDo(print())
@@ -65,13 +65,13 @@ public class UserControllerTest {
                 new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
 
         //회원가입은 post 메소드로 전송되므로
-        mockMvc.perform(post("api/v1/users/join")
+        mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         // todo: add request body
-                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName,password)))
+                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest("userName","password")))
 
                 ).andDo(print())
-                .andExpect(status().isConflict());
+                .andExpect(status().is(ErrorCode.DUPLICATED_USER_NAME.getStatus().value()));
 
     }
     @Test
@@ -83,10 +83,10 @@ public class UserControllerTest {
         when(userService.login(userName, password)).thenReturn("testToken");
 
         //회원가입은 post 메소드로 전송되므로
-        mockMvc.perform(post("api/v1/users/login")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         // todo: add request body
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName,password)))
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("userName","password")))
 
 
                 ).andDo(print())
@@ -100,18 +100,17 @@ public class UserControllerTest {
 
         //to do : mocking - 회원가입이 정상적으로 될 때, 반환 값
         when(userService.login(userName, password)).
-                thenThrow(new SnsApplicationException(ErrorCode.USER_NOT_FOUND, ""));
+                thenThrow(new SnsApplicationException(ErrorCode.USER_NOT_FOUND));
 
         //회원가입은 post 메소드로 전송되므로
-        mockMvc.perform(post("api/v1/users/login")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         // todo: add request body
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName,password)))
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("userName","password")))
 
 
                 ).andDo(print())
-                .andExpect(status().isNotFound());
-
+                .andExpect(status().is(ErrorCode.USER_NOT_FOUND.getStatus().value()));
     }
     @Test
     public void 로그인시_틀린_password를_입력할경우_에러반환() throws Exception {
@@ -120,18 +119,18 @@ public class UserControllerTest {
 
         //to do : mocking - 회원가입이 정상적으로 될 때, 반환 값
         when(userService.join(userName,password)).
-                thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME
-        , ""));
+                thenThrow(new SnsApplicationException(ErrorCode.INVALID_PASSWORD));
+
 
         //회원가입은 post 메소드로 전송되므로
-        mockMvc.perform(post("api/v1/users/login")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         // todo: add request body
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName,password)))
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("userName","password")))
 
 
                 ).andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().is(ErrorCode.INVALID_PASSWORD.getStatus().value()));
 
     }
 
