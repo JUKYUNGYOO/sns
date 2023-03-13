@@ -9,6 +9,7 @@ import com.example.sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService  {
 
 
     private final UserEntityRepository userEntityRepository;
@@ -30,6 +31,13 @@ public class UserService {
 
     @Value("${jwt.token.expired-time-ms}")
     private Long expiredTimeMs;
+
+    public User loadUserByUserName(String userName){
+         return userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(()->
+                 new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+//User타입으로 던지기 위해서 .map(User::fromEntity)
+
+    }
 
 
     //todo : implement

@@ -9,7 +9,27 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+import static io.jsonwebtoken.Jwts.parserBuilder;
+
 public class JwtTokenUtils {
+    //토큰에서 userName을 가지고옴..
+    public static String getUserName(String token, String key){
+        return extractClaims(token,key).get("userName",String.class);
+
+
+    }
+    public static boolean isExpired(String token, String key){
+        Date expiredDate = extractClaims(token,key).getExpiration();
+        return expiredDate.before(new Date());
+
+    }
+    //jwt token parsing - claims을 가지고 옴..
+    private static Claims extractClaims(String token, String key){
+        return Jwts.parserBuilder().setSigningKey(getKey(key))
+                .build().parseClaimsJws(token).getBody();  //토큰을 가지고 와서, 파싱해줌
+        //parseClaimsJwt -> parseClaimsJws
+        //error occurs while validation.io.jsonwebtoken.UnsupportedJwtException: Signed Claims JWSs are not supported.
+    }
     public static String generateToken(String userName,String key,long expiredTimeMs){
         Claims claims = Jwts.claims();
         claims.put("userName", userName);

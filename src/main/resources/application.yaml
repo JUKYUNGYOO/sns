@@ -15,6 +15,5 @@ spring:
     show-sql : true
 
 jwt:
-  secret-key: password_application_2023_key.secretkey_pass
-  #30 days
+  secret-key: fast-campus.simple_sns_2022_secret_key
   token.expired-time-ms : 2592000000
