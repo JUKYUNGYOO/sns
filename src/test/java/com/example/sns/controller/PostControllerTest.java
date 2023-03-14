@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -31,8 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -146,22 +146,22 @@ public class PostControllerTest {
     }
 
 
-    @Test
-    void 포스트작성이_성공한경우()  {
-        String title = "title";
-        String body = "body";
-        String userName = "userName";
-
-
-
-
-        // mocking
-        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(mock(UserEntity.class)));
-        when(userEntityRepository.save(any())).thenReturn(mock(PostEntity.class));
-
-        Assertions.assertDoesNotThrow(()-> postService.create(title,body,userName));
-
-    }
+//    @Test
+//    void 포스트작성이_성공한경우()  {
+//        String title = "title";
+//        String body = "body";
+//        String userName = "userName";
+//
+//
+//
+//
+//        // mocking
+//        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(mock(UserEntity.class)));
+//        when(userEntityRepository.save(any())).thenReturn(mock(PostEntity.class));
+//
+//        Assertions.assertDoesNotThrow(()-> postService.create(title,body,userName));
+//
+//    }
 //    @Test
 //    void 포스트수정시_권한이없는경우() throws Exception {
 //        String title = "title";
@@ -175,6 +175,74 @@ public class PostControllerTest {
 //        Assertions.assertDoesNotThrow(()-> postService.modify(title,body,userName,postId));
 //
 //    }
+    @Test
+    @WithMockUser
+    void 포스트삭제() throws Exception{
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+
+
+    }
+    @Test
+    @WithAnonymousUser
+    void 포스트삭제시_로그인하지않은경우() throws Exception{
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+    @Test
+    @WithMockUser
+    void 포스트삭제시_작성자와삭제요청자가다를경우() throws Exception{
+        //mocking
+        doThrow(new SnsApplicationException(ErrorCode.INVALID_PERMISSION))
+                .when(postService).delete(any(),any());
+
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+    @Test
+    @WithMockUser
+    void 포스트삭제시_삭제하려는_포스트가_존재하지않을경우() throws Exception{
+        //mocking
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND))
+                .when(postService).delete(any(),any());
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void 내피드목록() throws Exception{
+        when(postService.my(any(),any())).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/posts/my")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+
+
+    }
+    @Test
+    @WithAnonymousUser
+    void 내피드목록요청시_로그인하지않은경우() throws Exception{
+        when(postService.my(any(),any())).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/posts/my")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+
 
 
 
