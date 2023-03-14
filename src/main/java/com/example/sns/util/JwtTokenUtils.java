@@ -11,6 +11,7 @@ import java.util.Date;
 
 import static io.jsonwebtoken.Jwts.parserBuilder;
 
+//token parsing
 public class JwtTokenUtils {
     //토큰에서 userName을 가지고옴..
     public static String getUserName(String token, String key){
@@ -24,6 +25,8 @@ public class JwtTokenUtils {
 
     }
     //jwt token parsing - claims을 가지고 옴..
+
+    //parserBuilder에 key를 넣어줌.
     private static Claims extractClaims(String token, String key){
         return Jwts.parserBuilder().setSigningKey(getKey(key))
                 .build().parseClaimsJws(token).getBody();  //토큰을 가지고 와서, 파싱해줌

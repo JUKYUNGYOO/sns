@@ -3,6 +3,8 @@ package com.example.sns.service;
 import com.example.sns.SnsApplication;
 import com.example.sns.exception.ErrorCode;
 import com.example.sns.exception.SnsApplicationException;
+import com.example.sns.fixture.PostEntityFixture;
+import com.example.sns.fixture.UserEntityFixture;
 import com.example.sns.model.entity.PostEntity;
 import com.example.sns.model.entity.UserEntity;
 import com.example.sns.repository.PostEntityRepository;
@@ -56,5 +58,68 @@ public class PostServiceTest {
 
 
     }
+    @Test
+    void 포스트수정이_성공한경우(){
+        String title = "title";
+        String body = "body";
+        String userName = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName,postId,1);
+        UserEntity userEntity = postEntity.getUser();
+
+    //    PostEntity mockPostEntity = mock(PostEntity.class);
+        //mocking
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+     //   when(mockPostEntity.getUser().getId())
+        Assertions.assertDoesNotThrow(()->postService.modify(title,body,userName,postId));
+
+
+
+    }
+    @Test
+    void 포스트수정시_포스트가존재하지않는경우(){
+        String title = "title";
+        String body = "body";
+        String userName = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName,postId,1);
+        UserEntity userEntity = postEntity.getUser();
+
+        //    PostEntity mockPostEntity = mock(PostEntity.class);
+        //mocking
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
+        //   when(mockPostEntity.getUser().getId())
+        SnsApplicationException e = Assertions.assertThrows(SnsApplicationException.class, ()->
+                postService.modify(title,body,userName,postId));
+        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+
+
+    }
+    @Test
+    void 포스트수정시_권한이없는경우(){
+        String title = "title";
+        String body = "body";
+        String userName = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName,postId,1);
+        UserEntity writer = UserEntityFixture.get("userName1","password",2);
+
+        //    PostEntity mockPostEntity = mock(PostEntity.class);
+        //mocking
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(writer));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+        //   when(mockPostEntity.getUser().getId())
+        SnsApplicationException e = Assertions.assertThrows(SnsApplicationException.class, ()->
+                postService.modify(title,body,userName,postId));
+        Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+
+
+    }
+
 
 }

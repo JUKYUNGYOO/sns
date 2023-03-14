@@ -2,6 +2,7 @@ package com.example.sns.configuration;
 
 
 import com.example.sns.configuration.filter.JwtTokenFilter;
+import com.example.sns.exception.CustomAuthenticationEntryPoint;
 import com.example.sns.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +32,9 @@ public class AuthenticationConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(new JwtTokenFilter(key,userService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtTokenFilter(key,userService), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint());
         //들어온 토큰이 어떤 유저를 가르키는 지 확인하는 필터 - JwtTokenFilter
                 ;
 

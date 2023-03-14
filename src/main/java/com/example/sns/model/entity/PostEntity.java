@@ -8,6 +8,7 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Table(name = "\"post\"")
@@ -38,10 +39,20 @@ public class PostEntity {
     private UserRole role = UserRole.USER;
 
     @Column(name = "updated_at")
-    private Timestamp updateAt;
+    private Timestamp updatedAt;
 
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
+    @PrePersist
+    void registeredAt() {
+        this.registeredAt = Timestamp.from(Instant.now());
+    }
+
+    @PreUpdate
+    void updatedAt() {
+        this.updatedAt = Timestamp.from(Instant.now());
+    }
+
 
     public static PostEntity of(String title,String body,UserEntity userEntity){
         PostEntity entity = new PostEntity();
